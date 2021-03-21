@@ -2,7 +2,7 @@ from layers import *
 from metrics import *
 from layers import _LAYER_UIDS
 
-flags = tf.app.flags
+flags = tf.flags
 FLAGS = flags.FLAGS
 
 def lrelu(x):

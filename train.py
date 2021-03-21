@@ -10,19 +10,20 @@ import scipy.io as sio
 import numpy as np
 import scipy.sparse as sp
 from copy import deepcopy
+import tensorflow.compat.v1 as tf
 
-import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
 from utils import *
 from models import GCN_DEEP_DIVER
 
 N_bd = 32
 
 # Settings
-flags = tf.app.flags
+flags = tf.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_string('model', 'gcn_cheby', 'Model string.')  # 'gcn', 'gcn_cheby', 'dense'
 flags.DEFINE_float('learning_rate', 0.001, 'Initial learning rate.')
-flags.DEFINE_integer('epochs', 201, 'Number of epochs to train.')
+flags.DEFINE_integer('epochs', 1, 'Number of epochs to train.')
 flags.DEFINE_integer('hidden1', 32, 'Number of units in hidden layer 1.')
 flags.DEFINE_integer('diver_num', 32, 'Number of outputs.')
 flags.DEFINE_float('dropout', 0, 'Dropout rate (1 - keep probaNUmbility).')
@@ -32,7 +33,7 @@ flags.DEFINE_integer('max_degree', 1, 'Maximum Chebyshev polynomial degree.')
 flags.DEFINE_integer('num_layer', 20, 'number of layers.')
 
 # Load data
-data_path = "./data/CBS_Graph"
+data_path = "./data"
 train_mat_names = os.listdir(data_path)
 
 # Some preprocessing
@@ -90,13 +91,13 @@ for epoch in range(FLAGS.epochs):
     os.makedirs("result_IS4SAT_deep_ld32_c32_l20_cheb1_diver32_res32/%04d" % epoch)
     # for id in np.random.permutation(len(train_mat_names)):
     for idd in range(2000):
-        id = np.random.randint(38000)
+        id = np.random.randint(1)
         ct = ct + 1
         t = time.time()
         # load data
         mat_contents = sio.loadmat(data_path+'/'+train_mat_names[id])
         adj = mat_contents['adj']
-        yy = mat_contents['indset_label']
+        yy = mat_contents['indset_label'].transpose()
         nn, nr = yy.shape # number of nodes & results
         # y_train = yy[:,np.random.randint(0,nr)]
         # y_train = np.concatenate([1-np.expand_dims(y_train,axis=1), np.expand_dims(y_train,axis=1)],axis=1)

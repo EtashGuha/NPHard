@@ -5,26 +5,29 @@ import sys
 import os
 sys.path.append( '%s/gcn' % os.path.dirname(os.path.realpath(__file__)) )
 # add the libary path for graph reduction and local search
-# sys.path.append( '%s/kernel' % os.path.dirname(os.path.realpath(__file__)) )
+sys.path.append( '%s/kernel' % os.path.dirname(os.path.realpath(__file__)) )
 
 import time
 import scipy.io as sio
 import numpy as np
 import scipy.sparse as sp
-import Queue
+import queue
 from copy import deepcopy
 
 # import the libary for graph reduction and local search
-# from reduce_lib import reducelib
+from reduce_lib import reducelib
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from utils import *
 from models import GCN_DEEP_DIVER
 
 N_bd = 32
 
 # Settings
-flags = tf.app.flags
+flags = tf.flags
+tf.compat.v1.disable_eager_execution()
+
+
 FLAGS = flags.FLAGS
 flags.DEFINE_string('model', 'gcn_cheby', 'Model string.')  # 'gcn', 'gcn_cheby', 'dense'
 flags.DEFINE_float('learning_rate', 0.001, 'Initial learning rate.')
@@ -126,8 +129,8 @@ def reduce_graph(adj, nIS_vec_local):
     remain_vec = (nIS_vec_local == -1)
 
     # reduce graph
-    # reduced_node, reduced_adj, mapping, reverse_mapping, crt_is_size = api.reduce_graph(adj)
-    reduced_node, reduced_adj, mapping, reverse_mapping, crt_is_size = fake_reduce_graph(adj)
+    reduced_node, reduced_adj, mapping, reverse_mapping, crt_is_size = api.reduce_graph(adj)
+    # reduced_node, reduced_adj, mapping, reverse_mapping, crt_is_size = fake_reduce_graph(adj)
     nIS_vec_sub = reduced_node.copy()
     nIS_vec_sub_tmp = reduced_node.copy()
     nIS_vec_sub[nIS_vec_sub_tmp == 0] = 1
@@ -146,8 +149,8 @@ def reduce_graph(adj, nIS_vec_local):
         if np.sum(remain_vec_tmp) == 0:
             # get a solution
             res_ct += 1
-            # nIS_vec_local = api.local_search(adj_0, nIS_vec_local)
-            nIS_vec_local = fake_local_search(adj_0, nIS_vec_local)
+            nIS_vec_local = api.local_search(adj_0, nIS_vec_local)
+            # nIS_vec_local = fake_local_search(adj_0, nIS_vec_local)
             if np.sum(nIS_vec_local) > best_IS_num:
                 best_IS_num = np.sum(nIS_vec_local)
                 best_IS_vec = deepcopy(nIS_vec_local)
@@ -169,26 +172,30 @@ def reduce_graph(adj, nIS_vec_local):
 saver=tf.train.Saver(max_to_keep=1000)
 sess.run(tf.global_variables_initializer())
 
-ckpt=tf.train.get_checkpoint_state("./model")
+ckpt=tf.train.get_checkpoint_state("./result_IS4SAT_deep_ld32_c32_l20_cheb1_diver32_res32")
 print('loaded '+ckpt.model_checkpoint_path)
 saver.restore(sess,ckpt.model_checkpoint_path)
 
 noout = FLAGS.diver_num # number of outputs
-time_limit = 600  # time limit for searching
+time_limit = 100  # time limit for searching
 
 if not os.path.isdir("./res_%04d"%time_limit):
     os.makedirs("./res_%04d"%time_limit)
 
 # for graph reduction and local search
-# api = reducelib()
-
+api = reducelib()
+costs = []
+print(val_mat_names)
 for id in range(len(val_mat_names)):
     best_IS_num = -1
     mat_contents = sio.loadmat(data_path + '/' + val_mat_names[id])
     adj_0 = mat_contents['adj']
-    # yy = mat_contents['indset_label']
-    # opt_num = np.sum(yy[:,0])
-    # edges_0 = sp.find(adj_0) # for isis version 1
+    yy = mat_contents['indset_label'].transpose()
+    opt_num = np.sum(yy[:,0])
+    print(yy)
+    print("OPTNUM")
+    print(opt_num)
+    edges_0 = sp.find(adj_0) # for isis version 1
     edges_0 = findNodeEdges(adj_0)
     nn = adj_0.shape[0]
     bsf_q = []
@@ -260,8 +267,8 @@ for id in range(len(val_mat_names)):
                 if np.sum(remain_vec_tmp) == 0:
                     # get a solution
                     res_ct += 1
-                    # nIS_vec = api.local_search(adj_0, nIS_vec)
-                    nIS_vec = fake_local_search(adj_0, nIS_vec)
+                    nIS_vec = api.local_search(adj_0, nIS_vec)
+                    # nIS_vec = fake_local_search(adj_0, nIS_vec)
                     if np.sum(nIS_vec) > best_IS_num:
                         best_IS_num = np.sum(nIS_vec)
                         best_IS_vec = deepcopy(nIS_vec)
@@ -280,5 +287,7 @@ for id in range(len(val_mat_names)):
             nIS_vec = deepcopy(q_item[1])
             if reduce_graph(adj, nIS_vec):
                 continue
-
+    costs.append(opt_num -  best_IS_num)
     sio.savemat('./res_%04d/%s' % (time_limit, val_mat_names[id]), {'er_graph': adj_0, 'nIS_vec': best_IS_vec})
+print(costs)
+print(np.mean(costs))

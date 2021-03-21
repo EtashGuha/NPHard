@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 def my_softmax_cross_entropy(preds, labels):
     """Softmax cross-entropy loss with masking."""
