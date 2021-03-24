@@ -13,7 +13,7 @@ from copy import deepcopy
 import tensorflow.compat.v1 as tf
 
 tf.compat.v1.disable_eager_execution()
-from utils import *
+from gcn.utils import *
 from models import GCN_DEEP_DIVER
 
 N_bd = 32
