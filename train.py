@@ -23,7 +23,7 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_string('model', 'gcn_cheby', 'Model string.')  # 'gcn', 'gcn_cheby', 'dense'
 flags.DEFINE_float('learning_rate', 0.001, 'Initial learning rate.')
-flags.DEFINE_integer('epochs', 1, 'Number of epochs to train.')
+flags.DEFINE_integer('epochs', 30, 'Number of epochs to train.')
 flags.DEFINE_integer('hidden1', 32, 'Number of units in hidden layer 1.')
 flags.DEFINE_integer('diver_num', 32, 'Number of outputs.')
 flags.DEFINE_float('dropout', 0, 'Dropout rate (1 - keep probaNUmbility).')
