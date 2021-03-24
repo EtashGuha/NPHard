@@ -10,9 +10,9 @@ import scipy.io as sio
 import numpy as np
 import scipy.sparse as sp
 from copy import deepcopy
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 
-tf.compat.v1.disable_eager_execution()
+tf.disable_eager_execution()
 from gcn.utils import *
 from models import GCN_DEEP_DIVER
 
