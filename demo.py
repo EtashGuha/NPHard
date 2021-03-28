@@ -18,7 +18,7 @@ from copy import deepcopy
 from reduce_lib import reducelib
 
 import tensorflow.compat.v1 as tf
-from utils import *
+from gcn.utils import *
 from models import GCN_DEEP_DIVER
 
 N_bd = 32
@@ -192,9 +192,6 @@ for id in range(len(val_mat_names)):
     adj_0 = mat_contents['adj']
     yy = mat_contents['indset_label'].transpose()
     opt_num = np.sum(yy[:,0])
-    print(yy)
-    print("OPTNUM")
-    print(opt_num)
     edges_0 = sp.find(adj_0) # for isis version 1
     edges_0 = findNodeEdges(adj_0)
     nn = adj_0.shape[0]
