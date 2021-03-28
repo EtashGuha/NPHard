@@ -17,7 +17,7 @@ from copy import deepcopy
 # import the libary for graph reduction and local search
 from reduce_lib import reducelib
 
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from utils import *
 from models import GCN_DEEP_DIVER
 
@@ -25,7 +25,7 @@ N_bd = 32
 
 # Settings
 flags = tf.flags
-tf.compat.v1.disable_eager_execution()
+tf.disable_eager_execution()
 
 
 FLAGS = flags.FLAGS
@@ -41,7 +41,7 @@ flags.DEFINE_integer('max_degree', 1, 'Maximum Chebyshev polynomial degree.')
 flags.DEFINE_integer('num_layer', 20, 'number of layers.')
 
 # test data path
-data_path = "./data"
+data_path = "./data/stupiddata"
 val_mat_names = os.listdir(data_path)
 
 # Some preprocessing
